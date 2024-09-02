@@ -39,4 +39,5 @@
 [tagpr]
 	vPrefix = false
 	releaseBranch = main
-	versionFile = -
+	versionFile = package.json
+	command = npm run build 
