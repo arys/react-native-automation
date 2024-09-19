@@ -24,6 +24,7 @@ jobs:
           echo "No relevant files changed. Exiting job."
           exit 0
         fi
+        echo "relevant_files_changed=true" >> $GITHUB_OUTPUT
 
         if [ ! -z "${{ steps.tagpr.outputs.pull_request_number }}" ]; then
           PR_NUMBER="${{ steps.tagpr.outputs.pull_request_number }}"
@@ -39,3 +40,8 @@ jobs:
         fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Rerun tagpr if relevant files changed
+      if: ${{ steps.check_native_file_changes.outputs.relevant_files_changed == 'true' }}
+      uses: Songmu/tagpr@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
