@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - id: tagpr
-      uses: Songmu/tagpr@v1
+    - uses: Songmu/tagpr@v1
+      id: tagpr
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Checkout
