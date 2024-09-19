@@ -28,9 +28,9 @@ jobs:
         if [ ! -z "${{ steps.tagpr.outputs.pull_request.number }}" ]; then
           PR_NUMBER="${{ steps.tagpr.outputs.pull_request.number }}"
         else
-          PR=$(gh pr list --base main --label tagpr --status open --json number,state,labels[0])
+          PR=$(gh pr list --base main --label tagpr --state open --json number,state,labels --jq 'map(select(.labels | index({name: "native-change"}) | not)) | .[0]')
           echo $PR
-          PR_NUMBER=$(echo $PR | jq -r '.number')
+          PR_NUMBER=$(gh pr list --base main --label tagpr --state open --json number,state,labels --jq 'map(select(.labels | index({name: "native-change"}) | not)) | .[0].number')
           echo $PR_NUMBER
         fi
 
