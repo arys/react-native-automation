@@ -77,7 +77,7 @@ function App(): React.JSX.Element {
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
           <Section title="Step One">
-            New text new new new 2asdasd
+            New text new new new 2asdasd s
           </Section>
           <Section title="See Your Changes">
             <ReloadInstructions />
