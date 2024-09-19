@@ -8,6 +8,10 @@ jobs:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
+    - name: Modified files
+      run: |
+        echo "=============== list modified files ==============="
+        git diff --name-only origin/main
     - uses: actions/checkout@v4
     - uses: Songmu/tagpr@v1
       env:
