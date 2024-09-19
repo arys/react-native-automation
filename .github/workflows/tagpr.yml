@@ -8,43 +8,19 @@ jobs:
     permissions: write-all
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Modified files
-      run: |
-        echo "=============== list modified files ==============="
-        git diff --name-only origin/main
-    - uses: Songmu/tagpr@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - uses: actions/checkout@v4
-    - name: Set OTA minor version
-      run: |
-        echo "=============== list modified files ==============="
-        git diff --name-only origin/main
-
-        echo "========== check paths of modified files =========="
-        git diff --name-only origin/main > files.txt
-        while IFS= read -r file
-        do
-          echo $file
-          if [[ $file != ios/* ]]; then
-            echo "This modified file is not under the 'ios' folder."
-            echo "::set-output name=run_job::false"
-            break
-          else if [[ $file != android/* ]]; then
-            echo "This modified file is not under the 'android' folder."
-            echo "::set-output name=run_job::false"
-            break
-          else
-            echo "::set-output name=run_job::true"
-          fi
-        done < files.txt
-
-        if [[ $run_job == "true" ]]; then
-          echo "Relevant files have changed. Adding 'tagpr:minor' label."
-          gh pr edit ${{ github.event.pull_request.number }} --add-label "tagpr:minor"
-        else
-          echo "No relevant changes detected. Skipping label addition."
-        fi
+    # - uses: actions/checkout@v4
+    # - name: Modified files
+    #   run: |
+    #     echo "=============== list modified files ==============="
+    #     git diff --name-only origin/main
+    # - uses: Songmu/tagpr@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Get changes
+      run: git diff --name-only ${{ github.event.before }} ${{ github.event.after }}
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
