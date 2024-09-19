@@ -28,7 +28,10 @@ jobs:
         if [ ! -z "${{ steps.tagpr.outputs.pull_request.number }}" ]; then
           PR_NUMBER="${{ steps.tagpr.outputs.pull_request.number }}"
         else
-          PR_NUMBER=$(gh pr list --base main --label tagpr --json number,state,labels --jq 'map(select(.state == "open" and (.labels | index("native-change") | not)))[0].number')
+          PR=$(gh pr list --base main --label tagpr --status open --json number,state,labels[0])
+          echo $PR
+          PR_NUMBER=$(echo $PR | jq -r '.number')
+          echo $PR_NUMBER
         fi
 
         if [ -z "$PR_NUMBER" ]; then
