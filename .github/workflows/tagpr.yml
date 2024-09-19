@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: Songmu/tagpr@v1
+    - id: tagpr
+      uses: Songmu/tagpr@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Checkout
@@ -20,11 +21,9 @@ jobs:
       id: check_native_file_changes
       run: |
         if git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -qE 'ios|android'; then
-          echo "Relevant files have changed. Adding 'tagpr:minor' label."
           echo "relevant_files_changed=true" >> $GITHUB_OUTPUT
-          echo ${{ steps.check_native_file_changes.outputs.relevant_files_changed }}
         else
-          echo "No relevant changes detected. Skipping label addition."
+          echo "relevant_files_changed=false" >> $GITHUB_OUTPUT
         fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -32,8 +31,6 @@ jobs:
     - name: Set minor label
       if: steps.check_native_file_changes.outputs.relevant_files_changed == 'true'
       run: |
-        echo ${{ steps.tagpr.outputs.pull_request }}
-        echo ${{ steps.tagpr.outputs.pull_request.number }}
         gh pr edit ${{ steps.tagpr.outputs.pull_request.number }} --add-label "tagpr:minor"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
