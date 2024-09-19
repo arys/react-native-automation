@@ -17,20 +17,25 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Check native file changes
+    - name: Check native file changes and set ota minor label
       id: check_native_file_changes
       run: |
-        if git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -qE 'ios|android'; then
-          echo "relevant_files_changed=true" >> $GITHUB_OUTPUT
-        else
-          echo "relevant_files_changed=false" >> $GITHUB_OUTPUT
+        if ! git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -qE 'ios|android'; then
+          echo "No relevant files changed. Exiting job."
+          exit 0
         fi
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - uses: actions/checkout@v4
-    - name: Set minor label
-      if: steps.check_native_file_changes.outputs.relevant_files_changed == 'true'
-      run: |
-        gh pr edit ${{ steps.tagpr.outputs.pull_request.number }} --add-label "tagpr:minor"
+
+        if [ ! -z "${{ steps.tagpr.outputs.pull_request_number }}" ]; then
+          PR_NUMBER="${{ steps.tagpr.outputs.pull_request_number }}"
+        else
+          PR_NUMBER=$(gh pr list --base main --label tagpr --json number --jq '.[0].number')
+        fi
+
+        if [ ! -z "$PR_NUMBER" ]; then
+          gh pr edit $PR_NUMBER --add-label "tagpr:minor"
+          echo "Added tagpr:minor label to PR #$PR_NUMBER"
+        else
+          echo "No suitable PR found to add the tagpr:minor label"
+        fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
