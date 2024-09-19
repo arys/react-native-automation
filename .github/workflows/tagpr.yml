@@ -13,8 +13,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/checkout@v4
-      with:
-        ref: main
     - name: Set OTA minor version
       run: |
         echo "=============== list modified files ==============="
