@@ -1,5 +1,7 @@
 # Changelog
 
+## [3.0.0](https://github.com/arys/react-native-automation/compare/2.1.4...3.0.0) - 2024-09-19
+
 ## [2.1.4](https://github.com/arys/react-native-automation/compare/2.1.3...2.1.4) - 2024-09-19
 
 ## [2.1.3](https://github.com/arys/react-native-automation/compare/2.1.2...2.1.3) - 2024-09-03
