@@ -24,24 +24,29 @@ jobs:
           echo "No relevant files changed. Exiting job."
           exit 0
         fi
-        echo "relevant_files_changed=true" >> $GITHUB_OUTPUT
 
         if [ ! -z "${{ steps.tagpr.outputs.pull_request_number }}" ]; then
           PR_NUMBER="${{ steps.tagpr.outputs.pull_request_number }}"
         else
-          PR_NUMBER=$(gh pr list --base main --label tagpr --json number --jq '.[0].number')
+          PR_NUMBER=$(gh pr list --base main --label tagpr --json number,state,labels --jq 'map(select(.state == "open" and (.labels | index("native-change") | not)))[0].number')
         fi
 
-        if [ ! -z "$PR_NUMBER" ]; then
-          gh pr edit $PR_NUMBER --add-label "tagpr:minor"
-          echo "Added tagpr:minor label to PR #$PR_NUMBER"
-        else
-          echo "No suitable PR found to add the tagpr:minor label"
+        if [ -z "$PR_NUMBER" ]; then
+          echo "No PR number found. Exiting job."
+          exit 0
         fi
+
+        # Bump minor version in package.json
+        current_version=$(jq -r '.version' package.json)
+        new_version=$(echo $current_version | awk -F. -v OFS=. '{$2+=1; $3=0; print}')
+        jq --arg new_version "$new_version" '.version = $new_version' package.json > tmp.$$.json && mv tmp.$$.json package.json
+        echo "Bumped version from $current_version to $new_version in package.json"]
+
+        git add package.json
+        git commit -m "Bump version for ota update"
+        git push
+
+        gh pr edit $PR_NUMBER --add-label "native-change"
+        echo "Added native-change label to PR #$PR_NUMBER"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Rerun tagpr if relevant files changed
-      if: ${{ steps.check_native_file_changes.outputs.relevant_files_changed == 'true' }}
-      uses: Songmu/tagpr@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
