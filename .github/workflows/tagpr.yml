@@ -16,13 +16,22 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Set OTA minor version
+    - name: Check native file changes
+      id: check_native_file_changes
       run: |
         if git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -qE 'ios|android'; then
-          echo "Relevant files have changed. Adding 'tagpr:major' label."
-          gh pr edit ${{ steps.tagpr.outputs.pull_request.number }} --add-label "tagpr:major"
+          echo "Relevant files have changed. Adding 'tagpr:minor' label."
+          echo "relevant_files_changed=true" >> $GITHUB_OUTPUT
+          echo ${{ steps.check_native_file_changes.outputs.relevant_files_changed }}
         else
           echo "No relevant changes detected. Skipping label addition."
         fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@v4
+    - name: Set minor label
+      if: steps.check_native_file_changes.outputs.relevant_files_changed == 'true'
+      run: |
+        gh pr edit ${{ steps.tagpr.outputs.pull_request.number }} --add-label "tagpr:minor"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
