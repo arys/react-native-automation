@@ -20,7 +20,7 @@ jobs:
       run: |
         if git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep -qE 'ios|android'; then
           echo "Relevant files have changed. Adding 'tagpr:major' label."
-          gh pr edit ${{ github.event.pull_request.number }} --add-label "tagpr:major"
+          gh pr edit ${{ steps.tagpr.outputs.pull_request.number }} --add-label "tagpr:major"
         else
           echo "No relevant changes detected. Skipping label addition."
         fi
